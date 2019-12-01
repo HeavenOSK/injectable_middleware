@@ -1,17 +1,16 @@
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 import 'package:redux/redux.dart';
 
 /// A callback for [_TypedInjectableMiddleware].
-typedef InjectableMiddlewareCallback<State, Action, O> = void Function(
+typedef InjectableMiddlewareCallback<S, T, O> = void Function(
   O dependency,
-  Store<State> store,
-  Action action,
+  Store<S> store,
+  T action,
   NextDispatcher next,
 );
 
 /// A type matching middleware which is able to be injected dependency..
-class _TypedInjectableMiddleware<State, Action, O>
-    implements MiddlewareClass<State> {
+class _TypedInjectableMiddleware<S, T, O> implements MiddlewareClass<S> {
   const _TypedInjectableMiddleware({
     @required this.dependency,
     @required this.callback,
@@ -22,12 +21,12 @@ class _TypedInjectableMiddleware<State, Action, O>
   final O dependency;
 
   /// A callback for middleware with dependency.
-  final InjectableMiddlewareCallback<State, Action, O> callback;
+  final InjectableMiddlewareCallback<S, T, O> callback;
 
   /// Executes [callback] if tha type of [action] is matched.
   @override
-  void call(Store<State> store, dynamic action, NextDispatcher next) {
-    if (action is Action) {
+  void call(Store<S> store, dynamic action, NextDispatcher next) {
+    if (action is T) {
       callback(dependency, store, action, next);
     } else {
       next(action);
@@ -36,18 +35,19 @@ class _TypedInjectableMiddleware<State, Action, O>
 }
 
 /// A builder for [InjectableMiddleware].
-abstract class InjectableMiddlewareBuilder<State, Action, O> {
+abstract class InjectableMiddlewareBuilder<S, T, O> {
   const InjectableMiddlewareBuilder({
     @required this.callback,
   }) : assert(callback != null);
 
   /// A callback for [_TypedInjectableMiddleware].
   @protected
-  final InjectableMiddlewareCallback<State, Action, O> callback;
+  final InjectableMiddlewareCallback<S, T, O> callback;
 
   /// Builds middleware with [dependency].
   @mustCallSuper
-  _TypedInjectableMiddleware<State, Action, O> build(O dependency) {
+  @protected
+  _TypedInjectableMiddleware<S, T, O> build(O dependency) {
     return _TypedInjectableMiddleware(
       dependency: dependency,
       callback: callback,
@@ -56,16 +56,16 @@ abstract class InjectableMiddlewareBuilder<State, Action, O> {
 }
 
 /// A middleware which is able to be injected dependency.
-class InjectableMiddleware<State, O> {
+class InjectableMiddleware<S, O> {
   const InjectableMiddleware({
     @required this.builders,
   }) : assert(builders != null);
 
   /// A collection of [InjectableMiddlewareBuilder]s.
-  final Iterable<InjectableMiddlewareBuilder<State, dynamic, O>> builders;
+  final Iterable<InjectableMiddlewareBuilder<S, dynamic, O>> builders;
 
   /// Generates middleware with a [dependency]..
-  Iterable<Middleware<State>> call(O dependency) {
+  Iterable<Middleware<S>> call(O dependency) {
     assert(dependency != null);
     return [
       ...builders.map(
