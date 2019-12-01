@@ -1,0 +1,16 @@
+name: injectable_middleware
+description: A util for Redux to inject dependencies.
+version: 0.1.0
+author: Ryunosuke Watanabe <heavenosk@gmail.com>
+homepage: https://github.com/HeavenOSK/injectable_middleware
+environment:
+  sdk: ">=2.2.3 <3.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  redux: ^3.0.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  pedantic_mono: ^1.4.0
+flutter:
